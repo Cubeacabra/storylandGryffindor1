@@ -8,7 +8,7 @@
 #define led1 2
 #define led2 3
 #define servoPin 4
-
+#define laserPin 8
 //These 3 are if we use DC motor
 //#define motorPin1 5
 //#define motorPin2 6
@@ -46,8 +46,7 @@ int main(void){
 	pinMode(led2, OUTPUT);
 	pinMode(button, INPUT);
 	pinMode(tilt, INPUT);
-	pinMode(button, INPUT);
-	pinMode(button, INPUT);
+	pinMode(laserPin, OUTPUT);
 
 	//    Not sure but they had it in the tutorial here
 	//    digitalWrite(led1, HIGH);
@@ -61,14 +60,15 @@ int main(void){
 		// Indicate that button has pressed down
 		if(digitalRead(button) == 0){
 			// Led on
-			digitalWrite(led1, LOW);
+			//digitalWrite(led1, LOW);
 			//Can add different functionality here
-
+			digitalWrite(laser_pin, HIGH);
 			//  printf("...LED on\n");
 		}
 		else{
 			// Led off
-			digitalWrite(led1, HIGH);
+		//	digitalWrite(led1, HIGH);
+			digitalWrite(laser_pin, HIGH);
 			//Can add different functionality here
 
 			//  printf("LED off...\n");
