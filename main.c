@@ -1,6 +1,8 @@
 #include <wiringPi.h> //Wiring Pi
 #include <softPwm.h> //Servo Motor
 #include <stdio.h>
+#include <SDL2/SDL.h> //For Sound Library (The core of it)
+#include <SDL2/SDL_mixer.h> //For Sound Library (The actual sound stuff we need)
 
 //Define the pins we used in terms of wiring pi's language
 #define button 0
@@ -8,11 +10,14 @@
 #define led1 2
 #define led2 3
 #define servoPin 4
-#define laserPin 8
 //These 3 are if we use DC motor
 //#define motorPin1 5
 //#define motorPin2 6
 //#define motorEnable 7
+#define laserPin 8
+
+
+
 
 
 //Function from tutorial that "maps values" in the function after this one?
@@ -48,22 +53,70 @@ int main(void){
 	pinMode(tilt, INPUT);
 	pinMode(laserPin, OUTPUT);
 
+	//For DC Motor
+//	pinMode(MotorPin1, OUTPUT);
+//	pinMode(MotorPin2, OUTPUT);
+//	pinMode(MotorEnable, OUTPUT);
+
+
+	int wingsClosed = 20; //tune to real values later
+	int wingsOpen = 100; //tune to real values later
+	int currentAngle = wingsClosed;
+
 	//    Not sure but they had it in the tutorial here
 	//    digitalWrite(led1, HIGH);
 
 	softPwmCreate(servoPin, 0, 200);       //initialize PMW pin of servo
 
 
+	//Initialize the sound libray itself
+	if (SDL_Init(SDL_INIT_AUDIO) < 0) { //Check if library sets up right, if not return error
+		printf("SDL could not initialize! %s\n", SDL_GetError());
+		return 1;
+	}
+
+	// Initialize the part of the sound library that plays sounds
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) { //Check if library sets up right, if not return error
+		printf("SDL_mixer could not initialize! %s\n", Mix_GetError());
+		SDL_Quit();
+		return 1;
+	}
+
+	// Load WAV file
+	Mix_Chunk *laserSound = Mix_LoadWAV("laserSound.wav");
+	if (!laserSound) { //Check if sound is loaded good, if not return error
+		printf("Failed to load sound.wav! %s\n", Mix_GetError());
+		Mix_CloseAudio();
+		SDL_Quit();
+		return 1;
+	}
+
+
+	//Declare this variable so we make sure the sound doesnt spam
+	int lastButtonState = 1;
 	while(1){
 
 		//BUTTON
+
+		//Update button state
+		int currentButtonState = digitalRead(button);
+
 		// Indicate that button has pressed down
-		if(digitalRead(button) == 0){
+		if(currentButtonState == 0){
 			// Led on
 			//digitalWrite(led1, LOW);
 			//Can add different functionality here
+
+
 			digitalWrite(laserPin, HIGH);
+			//play laserSound IFF the lastButton state was off (avoids constant replaying sound and spam and doom)
+			if (lastButtonState == 1) {
+				//Play laser sound once
+				Mix_PlayChannel(-1, laserSound, 0);
+
+			}
 			//  printf("...LED on\n");
+
 		}
 		else{
 			// Led off
@@ -73,37 +126,89 @@ int main(void){
 
 			//  printf("LED off...\n");
 		}
+		lastButtonState = currentState;
 
-		//TILT SWITCH
+		//TILT SWITCH + SERVO MOTOR
 
 		if(0 == digitalRead(tilt)){ //Read of Zero means tilted
 			delay(10);
-			if(0 == digitalRead(tilt)){
-				printf("Tilt!\n");
-				//Add functionality with motor here
-			}
+			setAngle(servoPin,wingsOpen); //sets angle to Open
+			printf("Tilt!\n");
 		}
 		else if(1 == digitalRead(tilt)){ //Read of One means not tilted
 			delay(10);
-			if(1 == digitalRead(tilt)){
-				printf("Not Tilting!\n");
-				//Add functionality with motor here
-
-			}
+			setAngle(servoPin,wingsClosed); //sets angle to Closed
+			printf("Not Tilting!\n");
 		}
 
-		//SERVO 
-		for(int i=0;i<181;i++){     // Let servo rotate from 0 to 180.                  
-			setAngle(ServoPin,i); //change specifics for our needs
-			delay(2);
-		}
-		delay(1000);
-		for(int i=181;i>-1;i--){        // Let servo rotate from 180 to 0.              
-			setAngle(ServoPin,i); //change specifics for our needs
-			delay(2);
-		}
-		delay(1000);
 	}
 
-return 0;
+
+
+	//Leftover Code from sound testing file
+	/*
+	// Play sound once
+	//Mix_PlayChannel(-1, sound, 0);
+
+	// Wait until the sound finishes
+	//SDL_Delay(2000);  // 2000ms = 2 seconds, adjust if sound is longer
+
+
+	//-1 means use the first free audio channel. Sound is the sound variable we defined before, 0 means only play once
+	int channel = Mix_PlayChannel(-1, sound, 0);  // play once
+
+
+	if (channel == -1) { //make sure it plays at all
+	printf("Failed to play sound: %s\n", Mix_GetError()); //error if can't play
+	} else {
+	while (Mix_Playing(channel) != 0) { //Check if the sound is still playing, if not then end the loop (value is 1 if playing and 0 if not playing)
+	SDL_Delay(100);  // wait a short time and check again
+	}
+	}
+	*/
+
+
+	// Clean up sound library stuff before end program
+	Mix_FreeChunk(laserSound);
+	Mix_CloseAudio();
+	SDL_Quit();
+
+	//printf("Sound finished!\n");
+
+
+
+	return 0;
 }
+
+//-----------------------------------------------------
+//DC Motor tutorial code
+/*while(1){
+        printf("Clockwise\n");
+        digitalWrite(MotorEnable, HIGH); //Turns it on
+        digitalWrite(MotorPin1, HIGH); //Go clockwise (on)
+        digitalWrite(MotorPin2, LOW); // Go counterclockwise (off)
+        for(i=0;i<3;i++){
+            delay(1000);
+        }
+
+        printf("Stop\n");
+        digitalWrite(MotorEnable, LOW);
+        for(i=0;i<3;i++){
+            delay(1000);
+        }
+
+        printf("Anti-clockwise\n");
+        digitalWrite(MotorEnable, HIGH);
+        digitalWrite(MotorPin1, LOW);
+        digitalWrite(MotorPin2, HIGH);
+        for(i=0;i<3;i++){
+            delay(1000);
+        }
+
+        printf("Stop\n");
+        digitalWrite(MotorEnable, LOW);
+        for(i=0;i<3;i++){
+            delay(1000);
+        }
+    }
+    return 0;*/
