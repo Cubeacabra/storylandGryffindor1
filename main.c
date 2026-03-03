@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <SDL2/SDL.h> //For Sound Library (The core of it)
 #include <SDL2/SDL_mixer.h> //For Sound Library (The actual sound stuff we need)
+#include <signal.h>
+
 
 //Define the pins we used in terms of wiring pi's language
 #define button 0
@@ -19,6 +21,12 @@
 
 
 
+
+volatile int keepRunning = 1;
+
+void intHandler(int dummy) {
+    keepRunning = 0;
+}
 
 //Function from tutorial that "maps values" in the function after this one?
 long Map(long value,long fromLow,long fromHigh,long toLow,long toHigh){
@@ -39,7 +47,7 @@ void setAngle(int pin, int angle){    //Create a funtion to control the angle of
 
 
 int main(void){
-
+signal(SIGINT, intHandler);
 	// When initialize wiring failed, print message to screen
 	if(wiringPiSetup() == -1){
 		printf("setup wiringPi failed !");
@@ -110,7 +118,7 @@ int main(void){
 	int lastButtonState = 1;
 	int lastTiltState = 1;
 
-	while(1){
+	while(keepRunning/*1*/){
 
 		//BUTTON
 
