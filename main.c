@@ -59,9 +59,15 @@ int main(void){
 //	pinMode(MotorEnable, OUTPUT);
 
 
-	int wingsClosed = 20; //tune to real values later
-	int wingsOpen = 100; //tune to real values later
-	int currentAngle = wingsClosed;
+	//int wingsClosed = 20; //tune to real values later
+	//int wingsOpen = 100; //tune to real values later
+	//int currentAngle = wingsClosed;
+
+	
+//	int cockpitClosed = 0;
+//	int cockpitOpen = 70;
+//	int currentAngle = cockpitClosed;
+
 
 	//    Not sure but they had it in the tutorial here
 	//    digitalWrite(led1, HIGH);
@@ -82,8 +88,8 @@ int main(void){
 		return 1;
 	}
 
-	// Load WAV file
-	Mix_Chunk *laserSound = Mix_LoadWAV("laserSound.wav");
+	// Load WAV file for lazer
+	Mix_Chunk *laserSound = Mix_LoadWAV("XWingLazerBeamz.wav");
 	if (!laserSound) { //Check if sound is loaded good, if not return error
 		printf("Failed to load sound.wav! %s\n", Mix_GetError());
 		Mix_CloseAudio();
@@ -91,9 +97,19 @@ int main(void){
 		return 1;
 	}
 
+	// Load WAV file for flight
+	Mix_Chunk *flySound = Mix_LoadWAV("XWingFlyBy.wav");
+	if (!flySound) { //Check if sound is loaded good, if not return error
+		printf("Failed to load sound.wav! %s\n", Mix_GetError());
+		Mix_CloseAudio();
+		SDL_Quit();
+		return 1;
+	}
 
-	//Declare this variable so we make sure the sound doesnt spam
+	//Declare these variables so we make sure the sound doesnt spam
 	int lastButtonState = 1;
+	int lastTiltState = 1;
+
 	while(1){
 
 		//BUTTON
@@ -103,10 +119,8 @@ int main(void){
 
 		// Indicate that button has pressed down
 		if(currentButtonState == 0){
-			// Led on
+			//Led on
 			//digitalWrite(led1, LOW);
-			//Can add different functionality here
-
 
 			digitalWrite(laserPin, HIGH);
 			//play laserSound IFF the lastButton state was off (avoids constant replaying sound and spam and doom)
@@ -115,31 +129,38 @@ int main(void){
 				Mix_PlayChannel(-1, laserSound, 0);
 
 			}
-			//  printf("...LED on\n");
+			printf("...LED on\n");
 
 		}
 		else{
-			// Led off
-			//	digitalWrite(led1, HIGH);
+			//Led off
+			//digitalWrite(led1, HIGH);
 			digitalWrite(laserPin, LOW);
-			//Can add different functionality here
 
-			//  printf("LED off...\n");
+			printf("LED off...\n");
 		}
 		lastButtonState = currentState;
 
 		//TILT SWITCH + SERVO MOTOR
 
-		if(0 == digitalRead(tilt)){ //Read of Zero means tilted
+		int currentTiltState = digitalRead(tilt);
+
+		if(0 == currentTiltState){ //Read of Zero means tilted
 			delay(10);
-			setAngle(servoPin,wingsOpen); //sets angle to Open
+			//setAngle(servoPin,wingsOpen); //sets angle to Open
 			printf("Tilt!\n");
+			if (lastTiltState == 1) {
+				Mix_PlayChannel(-1, flySound, 0);
+			
+			}
+
 		}
-		else if(1 == digitalRead(tilt)){ //Read of One means not tilted
+		else if(1 == currentTiltState){ //Read of One means not tilted
 			delay(10);
-			setAngle(servoPin,wingsClosed); //sets angle to Closed
+			//setAngle(servoPin,wingsClosed); //sets angle to Closed
 			printf("Not Tilting!\n");
 		}
+		lastTiltState = currentTiltState;
 
 	}
 
@@ -170,6 +191,7 @@ int main(void){
 
 	// Clean up sound library stuff before end program
 	Mix_FreeChunk(laserSound);
+	Mix_FreeChunk(flySound);
 	Mix_CloseAudio();
 	SDL_Quit();
 
