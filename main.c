@@ -10,7 +10,10 @@
 #define button 0
 #define tilt 1
 #define led1 2
-#define led2 3
+/*#define led2 3
+#define led3 5
+#define led4 6
+*/
 #define servoPin 4
 //These 3 are if we use DC motor
 //#define motorPin1 5
@@ -77,8 +80,8 @@ signal(SIGINT, intHandler);
 //	int currentAngle = cockpitClosed;
 
 
-	//    Not sure but they had it in the tutorial here
-	//    digitalWrite(led1, HIGH);
+	    Not sure but they had it in the tutorial here
+	    digitalWrite(led1, HIGH);
 
 	softPwmCreate(servoPin, 0, 200);       //initialize PMW pin of servo
 
@@ -128,21 +131,22 @@ signal(SIGINT, intHandler);
 		// Indicate that button has pressed down
 		if(currentButtonState == 0){
 			//Led on
-			//digitalWrite(led1, LOW);
 
 			digitalWrite(laserPin, LOW);
 			//play laserSound IFF the lastButton state was off (avoids constant replaying sound and spam and doom)
 			if (lastButtonState == 1) {
 				//Play laser sound once
 				Mix_PlayChannel(-1, laserSound, 0);
+				//Turn LED On
+				digitalWrite(led1, LOW);
 
 			}
 			//printf("...LED on\n");
 
 		}
 		else{
-			//Led off
-			//digitalWrite(led1, HIGH);
+			//Turn LED & Laser Off
+			digitalWrite(led1, HIGH);
 			digitalWrite(laserPin, HIGH);
 
 			//printf("LED off...\n");
