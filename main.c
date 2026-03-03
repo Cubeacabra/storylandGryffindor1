@@ -122,7 +122,7 @@ int main(void){
 			//Led on
 			//digitalWrite(led1, LOW);
 
-			digitalWrite(laserPin, HIGH);
+			digitalWrite(laserPin, LOW);
 			//play laserSound IFF the lastButton state was off (avoids constant replaying sound and spam and doom)
 			if (lastButtonState == 1) {
 				//Play laser sound once
@@ -135,7 +135,7 @@ int main(void){
 		else{
 			//Led off
 			//digitalWrite(led1, HIGH);
-			digitalWrite(laserPin, LOW);
+			digitalWrite(laserPin, HIGH);
 
 			printf("LED off...\n");
 		}
@@ -148,7 +148,7 @@ int main(void){
 		if(0 == currentTiltState){ //Read of Zero means tilted
 			delay(10);
 			//setAngle(servoPin,wingsOpen); //sets angle to Open
-			printf("Tilt!\n");
+			//printf("Tilt!\n");
 			if (lastTiltState == 1) {
 				Mix_PlayChannel(-1, flySound, 0);
 			
@@ -158,7 +158,7 @@ int main(void){
 		else if(1 == currentTiltState){ //Read of One means not tilted
 			delay(10);
 			//setAngle(servoPin,wingsClosed); //sets angle to Closed
-			printf("Not Tilting!\n");
+			//printf("Not Tilting!\n");
 		}
 		lastTiltState = currentTiltState;
 
