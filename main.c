@@ -137,7 +137,7 @@ signal(SIGINT, intHandler);
 				Mix_PlayChannel(-1, laserSound, 0);
 
 			}
-			printf("...LED on\n");
+			//printf("...LED on\n");
 
 		}
 		else{
@@ -145,7 +145,7 @@ signal(SIGINT, intHandler);
 			//digitalWrite(led1, HIGH);
 			digitalWrite(laserPin, HIGH);
 
-			printf("LED off...\n");
+			//printf("LED off...\n");
 		}
 		lastButtonState = currentButtonState;
 
@@ -156,7 +156,7 @@ signal(SIGINT, intHandler);
 		if(0 == currentTiltState){ //Read of Zero means tilted
 			delay(10);
 			//setAngle(servoPin,wingsOpen); //sets angle to Open
-			//printf("Tilt!\n");
+			printf("Tilt!\n");
 			if (lastTiltState == 1) {
 				Mix_PlayChannel(-1, flySound, 0);
 			
@@ -166,7 +166,7 @@ signal(SIGINT, intHandler);
 		else if(1 == currentTiltState){ //Read of One means not tilted
 			delay(10);
 			//setAngle(servoPin,wingsClosed); //sets angle to Closed
-			//printf("Not Tilting!\n");
+			printf("Not Tilting!\n");
 		}
 		lastTiltState = currentTiltState;
 
