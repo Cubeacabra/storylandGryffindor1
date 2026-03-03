@@ -139,7 +139,7 @@ int main(void){
 
 			printf("LED off...\n");
 		}
-		lastButtonState = currentTiltState;
+		lastButtonState = currentButtonState;
 
 		//TILT SWITCH + SERVO MOTOR
 
